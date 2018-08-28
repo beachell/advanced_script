@@ -1,0 +1,25 @@
+polyCube -width 3 -height 1 -depth 1 -subdivisionsX 1 -subdivisionsY 1 -subdivisionsZ 1 -axis 0 1 0 -createUVs 4 -constructionHistory 1 -name "body";
+select -replace body.f[0] ;
+PolyExtrude;
+hilite body.f[0];
+selectMode -component;
+select -replace body.f[0];
+polyExtrudeFacet -constructionHistory 1 -keepFacesTogether 1 -pivotX 0 -pivotY 0 -pivotZ 0 -divisions 1 -twist 0 - taper 1 -thickness 0 -smoothingAngle 30 body.f[0];
+scale -relative -pivot 0cm 0cm 0.5cm 0.730621 0.730621 0.730621;
+select -replace body.f[0];
+polyExtrudeFacet -constructionHistory 1 -keepFacesTogether 1 -pivotX 0 -pivotY 0 -pivotZ 0 -divisions 1 -twist 0 - taper 1 -thickness 0 -smoothingAngle 30 body.f[0];
+select -replace body.f[0];
+move -relative 0 0 1;
+rotate -relative -pivot 0cm 0cm 1.5cm -objectSpace -forceOrderXYZ -30 0 0 ;
+//work on the polycylinder wheels
+polyCylinder -radius 1 -height 0.5 -subdivisionsX 8 -subdivisionsY 1 -subdivisionsZ 1 -axis 0 1 0 -roundCap 0 -constructionHistory 1;
+select -replace pCylinder1;
+rotate -relative -objectSpace -forceOrderXYZ 0 0 90;
+duplicate -returnRootsOnly;
+move -relative -1.5 0 0;
+select -replace pCylinder1 ;
+move -relative 1.5 0 0;
+select -replace pCylinder1 ;
+select -toggle pCylinder2 ;
+doGroup 0 1 1;
+parent group1 body ;

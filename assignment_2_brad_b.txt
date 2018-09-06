@@ -1,0 +1,15 @@
+global proc Duplicator(){
+     for ($i = 0; $i <10; $i++){
+         int $randNumX = rand (-10, 10 ) ;         
+         int $randNumZ = rand (-10, 10 ) ;  
+        string $house[0] = `polyCube -width 1 -height 1 -depth 1 -subdivisionsX 2 -subdivisionsY 2 -subdivisionsZ 2 -axis 0 1 0 -createUVs 4 -constructionHistory 1`;        
+        select -replace pCube1.e[26] ;
+        select -toggle pCube1.e[23] ;
+        select -replace pCube1;
+        move -relative $randNumX 0 $randNumZ $house ;
+     
+     }
+    
+}
+
+Duplicator()

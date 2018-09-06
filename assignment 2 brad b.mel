@@ -1,0 +1,16 @@
+select -all;
+global proc Duplicator(){
+     for ($i = 0; $i <10; $i++){
+         
+         int $randNumX = rand (-10, 10 ) ;         
+         int $randNumZ = rand (-10, 10 ) ;  
+        string $house[0] = `ls -shapes`;      
+        duplicate -returnRootsOnly;    
+      //  select -replace pCube1.e[26] ;        
+        move -relative $randNumX 0 $randNumZ $house ;
+     
+     }
+    
+}
+
+Duplicator()

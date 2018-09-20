@@ -1,0 +1,26 @@
+
+global proc ObjectLoader(string $objectName){
+   
+	string $objects[]=`ls -sl`;
+	int $sizeOfObjects = size($objects);
+	
+	string $tokenizedName[];
+	tokenize $objectName "#" $tokenizedName;
+	int $nameHash = size($objectName) - (size($tokenizedName[0]) + size($tokenizedName[1]));
+	
+	for ($i = 0 ; $i < $sizeOfObjects ; $i++){
+	    
+	    string $padding;
+	    int $numOfPaddedZeros = $nameHash - size(string($i +1));
+	   
+	    for ($Q = 0; $Q < $numOfPaddedZeros; $Q++){
+	        $padding += "0";
+	    }
+	    
+	    string $newName = $tokenizedName[0] + $padding + ($i + 1) + $tokenizedName[1];
+	    rename $objects[$i] $newName;
+	    print ("test");
+	}  
+}
+
+ObjectLoader("Arm_###_Jnt");

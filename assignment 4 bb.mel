@@ -1,0 +1,200 @@
+//this is the first assignment with the ui
+
+global proc BradToolBoxUi(){
+    string $aWindow = "RandomPlacementWindow";
+		if(`window -exists $aWindow`){
+		deleteUI $aWindow;
+		}
+	window;
+	columnLayout;
+    button -label "Ctrl Creator" -command "CtrlCreatorUi"; 
+    showWindow;
+}
+
+
+global proc CtrlCreatorUi(){
+	string $aWindow = "RandomPlacementWindow";
+		if(`window -exists $aWindow`){
+		deleteUI $aWindow;
+		}
+	window;
+	columnLayout;
+	//button -label "whitebox car" -command ""; //enter the function name at the command area to run
+	
+	//text -label "Use this to choose a new color for cntrls"   -align "left";
+	colorIndexSliderGrp  -label "Select Color for ctrl" -min 5 -max 20 -value 5 ;//need to get the color number from value
+	
+	//$colorGrp = `colorIndexSliderGrp -query -value`;
+	//print ($colorGrp);
+	
+	text -label "First part of name";
+	string $UserInputText = `textField`; 
+	columnLayout -adjustableColumn true;
+	optionMenu -label "Type of" -changeCommand "print #1";
+		menuItem -label "Jnt";
+		menuItem -label "Ctrl";        
+		menuItem -label "Grp";    
+	
+	text -label "Use this button to create ctls";  
+	button -label "Create Ctrl" -command "GettingValues" ; //enter the function name at the command area to run
+	
+	//use this ObjectLoader("Arm_###_Jnt"); replace the Arm_###_Jnt with (UserInputText +_###_+ typeOfobject)
+	
+	showWindow;//have this at the last part of the BradToolBoxUi function.
+}
+BradToolBoxUi();
+
+global proc GettingValues(){
+   global int ()
+    }
+//---------------------------------------------------------------------------------------------renamer
+
+global proc ObjectLoader(string $objectName){
+   
+	string $objects[]=`ls -sl`;
+	int $sizeOfObjects = size($objects);	
+	string $tokenizedName[];
+	tokenize $objectName "#" $tokenizedName;
+	int $nameHash = size($objectName) - (size($tokenizedName[0]) + size($tokenizedName[1]));	
+	for ($i = 0 ; $i < $sizeOfObjects ; $i++){	    
+	    string $padding;
+	    int $numOfPaddedZeros = $nameHash - size(string($i +1));	   
+	    for ($Q = 0; $Q < $numOfPaddedZeros; $Q++){
+	        $padding += "0";
+	    }	    
+	    string $newName = $tokenizedName[0] + $padding + ($i + 1) + $tokenizedName[1];
+	    rename $objects[$i] $newName;
+	    
+	}  
+}
+//ObjectLoader("Arm_###_Jnt");
+global proc CreateLocator (){
+    
+    string $sels[] = `ls -sl`;
+  int $selsSize = size($sels);
+  int $tempSize = $selsSize;
+  
+  if ($tempSize>0){
+   $tempSize--;
+  
+   for( $selsSize in $sels ){ //this runs so long as there is more than zero objects selected
+    print($tempSize);
+        } 
+       }else {
+           print("000000000000");
+           }  
+}
+CreateLocator();
+
+global proc colorControls(string $ctrlName[] int $color){
+
+string $shapes[];
+//find shape node of $ctrl
+$shapes = `listRelatives -shapes $ctrl`;
+
+//enable override on $shape
+for ($shape in $shapes){
+    if(nodeType $shape == "nurbsCurve"){
+    //checks if there's a nurbscurve
+        //set $shape color to $color
+        setAttr ($shape +".overrideEnabled") 1;
+        //changes the color of the control to the color
+        SetAtter ($shape + ".overrideColor") $color;
+    }else {warning("Selected object is not a curve.");}
+    
+}
+
+}
+global proc CreateCrtls(){
+    string $sels[] = `circle - name ($sel + "_Ctrl")`;
+    string $ctrl = $ctrls[0];
+    ColorControls($ctrl, $color);
+
+}
+
+//-------------------------ctrl shape creators
+proc StarCtrl(){
+       circle -center 0 0 0-normal 0 1 0 -sweep 360 -radius 1 -degree 3 -useTolerance 0 -tol 0.01 -sections 8 -constructionHistory 1 -name Star_Ctrl; objectMoveCommand;
+     select -r Star_Ctrl.cv[0] Star_Ctrl.cv[2] Star_Ctrl.cv[4] Star_Ctrl.cv[6];
+    scale -relative -pivot 0cm 0cm 0cm 0.09 0.09 0.09;
+    select -replace Star_Ctrl;
+    string $Star[]  = `ls -sl`;
+    int $starNum = 14;
+     ColorControls($Star, $starNum);
+}
+
+StarCtrl();
+
+proc TriangleCtrl(){
+     circle -center 0 0 0-normal 0 1 0 -sweep 360 -radius 1 -degree 3 -useTolerance 0 -tol 0.01 -sections 8 -constructionHistory 1 -name Triangle_Ctrl; objectMoveCommand;
+     select -r Triangle_Ctrl.cv[3:7];
+     scale -r -p 0cm 0cm 0.5cm 1 1 1e-05;
+     select -r Triangle_Ctrl.cv[0] Triangle_Ctrl.cv[2];
+     scale -r -p 0cm 0cm -0.7cm 0.2 1 1;
+     string $Tri[]  = `ls -sl`;
+     int $triNum = 8;
+     ColorControls($Tri, $triNum);
+}
+TriangleCtrl();
+
+
+proc SquareCtrl(){    
+    circle -center 0 0 0 -normal 0 1 0 -sweep 360 -radius 1 -degree 3 -useTolerance 0 -tol .01 -sections 8 -constructionHistory 1 -name Square_Ctrl; objectMoveCommand;
+     select -r Triangle_Ctrl.cv[3:7];
+    select -toggle nurbsCircle1.cv[3] nurbsCircle1.cv[7] ;
+    select -toggle nurbsCircle1.cv[1] nurbsCircle1.cv[5] ;
+    scale -relative -pivot 0cm 0cm 0cm 1.2 1.2 1.2 ;  
+    string $Square[]  = `ls -sl`; 
+    int $squarNum = 7;
+     ColorControls($Square, $squarNum);
+}
+SquareCtrl();
+
+
+//--------------------------------------------------------whitebox car creator function
+global proc carMaker(){
+polyCube -width 3 -height 1 -depth 1 -subdivisionsX 1 -subdivisionsY 1 -subdivisionsZ 1 -axis 0 1 0 -createUVs 4 -constructionHistory 1 -name "body";
+select -replace body.f[0] ;
+PolyExtrude;
+hilite body.f[0];
+selectMode -component;
+select -replace body.f[0];
+polyExtrudeFacet -constructionHistory 1 -keepFacesTogether 1 -pivotX 0 -pivotY 0 -pivotZ 0 -divisions 1 -twist 0 - taper 1 -thickness 0 -smoothingAngle 30 body.f[0];
+scale -relative -pivot 0cm 0cm 0.5cm 0.730621 0.730621 0.730621;
+select -replace body.f[0];
+polyExtrudeFacet -constructionHistory 1 -keepFacesTogether 1 -pivotX 0 -pivotY 0 -pivotZ 0 -divisions 1 -twist 0 - taper 1 -thickness 0 -smoothingAngle 30 body.f[0];
+select -replace body.f[0];
+move -relative 0 0 1;
+rotate -relative -pivot 0cm 0cm 1.5cm -objectSpace -forceOrderXYZ -30 0 0 ;
+//work on the polycylinder wheels
+polyCylinder -radius 1 -height 0.5 -subdivisionsX 8 -subdivisionsY 1 -subdivisionsZ 1 -axis 0 1 0 -roundCap 0 -constructionHistory 1;
+select -replace pCylinder1;
+rotate -relative -objectSpace -forceOrderXYZ 0 0 90;
+duplicate -returnRootsOnly;
+move -relative -1.5 0 0;
+select -replace pCylinder1 ;
+move -relative 1.5 0 0;
+select -replace pCylinder1 ;
+select -toggle pCylinder2 ;
+doGroup 0 1 1;
+parent group1 body ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//-----------------------------------test area
